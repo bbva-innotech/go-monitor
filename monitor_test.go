@@ -2,6 +2,7 @@ package monitor_test
 
 import (
 	"github.com/bbva-innotech/go-monitor"
+	"time"
 )
 
 func Example() {
@@ -14,8 +15,11 @@ func Example() {
 	monValueB.Add(2222)
 
 	monitor.Start()
-	// Output:
+	time.Sleep(time.Millisecond * 2100)
+	monitor.Stop()
+
+	// The output must be:
 	// Value_A Value_B
 	//    1111    2222
-	//    1111    0000
+	//    1111       0
 }
