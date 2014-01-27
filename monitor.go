@@ -1,3 +1,14 @@
+// Package monitor allows to print counters information into stdout, printing a
+// row each second with the status of all Field objects and a title row each ten
+// seconds with titles given to each Field objects.
+//
+// Fields column order is set by creation order.
+//
+// Fields can be added in realtime after a Start() signal is given. In this case
+// a new row with titles will be printed
+//
+// Field titles must be longest than longest value that will be displayed as
+// titles they are not adapted yet
 package monitor
 
 import (
@@ -6,6 +17,8 @@ import (
 	"time"
 )
 
+// Field struct gives control over information printed for this field on each
+// row
 type Field struct {
 	title string
 	value int
@@ -13,40 +26,50 @@ type Field struct {
 	wait  chan int
 }
 
-func (f *Field) Add(n int) {
+// Add adds given value to Field value
+func (f *Field) Add(number int) {
 	f.wait <- 1
-	f.value += n
+	f.value += number
 	<-f.wait
 }
 
-func (f *Field) Set(n int) {
+// Set sets Field value to given number
+func (f *Field) Set(number int) {
 	f.wait <- 1
-	f.value = n
+	f.value = number
 	<-f.wait
 }
 
-var fields []*Field
+var fields = []*Field{}
 var previousFieldCount int
+var stop = make(chan int)
 
-func init() {
-	fields = []*Field{}
-}
-
+// Start gives the order to start printing information on stdout
 func Start() {
 	go func() {
 		tick := time.NewTicker(time.Second).C
 		count := 0
 		for {
-			<-tick
-			if count%10 == 0 || previousFieldCount != len(fields) {
-				printTitles()
-			}
-			previousFieldCount = len(fields)
+			select {
+			case <-tick:
+				if count%10 == 0 || previousFieldCount != len(fields) {
+					printTitles()
+				}
+				previousFieldCount = len(fields)
 
-			printValues()
-			count++
+				printValues()
+				count++
+
+			case <-stop:
+				break
+			}
 		}
 	}()
+}
+
+// Stop gives the order to stop printing information on stdout
+func Stop() {
+	stop <- 1
 }
 
 func printTitles() {
@@ -69,7 +92,11 @@ func printValues() {
 	fmt.Println()
 }
 
-// creates a new monitor field that is shown as a column each second
+// NewField creates a new monitor field that is shown as a column each second
+//
+// - title is the title printed on titles row each ten seconds
+//
+// - reset tells to reset field value after each time its printed
 func NewField(title string, reset bool) *Field {
 	field := new(Field)
 	field.title = title
