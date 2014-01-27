@@ -18,7 +18,7 @@ func Example() {
 	time.Sleep(time.Millisecond * 2100)
 	monitor.Stop()
 
-	// The output must be:
+	// Output:
 	// Value_A Value_B
 	//    1111    2222
 	//    1111       0

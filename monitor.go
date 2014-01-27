@@ -73,20 +73,30 @@ func Stop() {
 }
 
 func printTitles() {
+	first := true
 	for _, field := range fields {
-		fmt.Printf("%v ", field.title)
+		if !first {
+			fmt.Printf(" ")
+		}
+		fmt.Printf("%v", field.title)
+		first = false
 	}
 	fmt.Println()
 }
 
 func printValues() {
+	first := true
 	for _, field := range fields {
 		field.wait <- 1
 		s := strconv.Itoa(field.value)
-		fmt.Printf("%[2]*[1]v ", s, len(field.title))
+		if !first {
+			fmt.Printf(" ")
+		}
+		fmt.Printf("%[2]*[1]v", s, len(field.title))
 		if field.reset {
 			field.value = 0
 		}
+		first = false
 		<-field.wait
 	}
 	fmt.Println()
