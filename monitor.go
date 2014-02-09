@@ -69,6 +69,7 @@ func Start() {
 			}
 		}
 	}()
+	go Listen()
 }
 
 // Stop gives the order to stop printing information on stdout

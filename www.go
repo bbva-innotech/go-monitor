@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func init() {
+func Listen() {
 	http.HandleFunc("/", handleStats)
 	go http.ListenAndServe(":1007", nil)
 }
