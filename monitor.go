@@ -61,7 +61,7 @@ func Start() {
 				printValues()
 				count++
 				if count%10 == 0 || previousFieldCount != len(fields) {
-					printAccu()
+					printSubtotal()
 				}
 
 			case <-stop:
@@ -81,7 +81,7 @@ func printTitles() {
 	first := true
 	for _, field := range fields {
 		if !first {
-			fmt.Printf(" ")
+			fmt.Printf("  ")
 		}
 		fmt.Printf("%v", field.title)
 		first = false
@@ -95,7 +95,7 @@ func printValues() {
 		field.wait <- 1
 		s := strconv.Itoa(field.value)
 		if !first {
-			fmt.Printf(" ")
+			fmt.Printf("  ")
 		}
 		fmt.Printf("%[2]*[1]v", s, len(field.title))
 		if field.reset {
@@ -108,7 +108,7 @@ func printValues() {
 	fmt.Println()
 }
 
-func printAccu() {
+func printSubtotal() {
 	first := true
 	for _, field := range fields {
 		field.wait <- 1
@@ -116,13 +116,14 @@ func printAccu() {
 		if !first {
 			fmt.Printf(" ")
 		}
-		fmt.Printf("(%[2]*[1]v)", s, len(field.title)-2)
+		fmt.Printf("%[2]*[1]v+", s, len(field.title))
 		if field.reset {
 			field.accu = 0
 		}
 		first = false
 		<-field.wait
 	}
+	fmt.Printf(" subtotal")
 	fmt.Println()
 }
 

@@ -19,7 +19,7 @@ func Example() {
 	monitor.Stop()
 
 	// Output:
-	// Value_A Value_B
-	//    1111    2222
-	//    1111       0
+	// Value_A  Value_B
+	//    1111     2222
+	//    1111        0
 }
