@@ -123,7 +123,6 @@ func printSubtotal() {
 		first = false
 		<-field.wait
 	}
-	fmt.Printf(" subtotal")
 	fmt.Println()
 }
 
