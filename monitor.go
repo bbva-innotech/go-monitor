@@ -22,6 +22,7 @@ import (
 type Field struct {
 	title string
 	value int
+	accu  int
 	reset bool
 	wait  chan int
 }
@@ -59,6 +60,9 @@ func Start() {
 
 				printValues()
 				count++
+				if count%10 == 0 || previousFieldCount != len(fields) {
+					printAccu()
+				}
 
 			case <-stop:
 				break
@@ -73,6 +77,7 @@ func Stop() {
 }
 
 func printTitles() {
+	fmt.Println()
 	first := true
 	for _, field := range fields {
 		if !first {
@@ -94,7 +99,26 @@ func printValues() {
 		}
 		fmt.Printf("%[2]*[1]v", s, len(field.title))
 		if field.reset {
+			field.accu += field.value
 			field.value = 0
+		}
+		first = false
+		<-field.wait
+	}
+	fmt.Println()
+}
+
+func printAccu() {
+	first := true
+	for _, field := range fields {
+		field.wait <- 1
+		s := strconv.Itoa(field.accu)
+		if !first {
+			fmt.Printf(" ")
+		}
+		fmt.Printf("(%[2]*[1]v)", s, len(field.title)-2)
+		if field.reset {
+			field.accu = 0
 		}
 		first = false
 		<-field.wait
