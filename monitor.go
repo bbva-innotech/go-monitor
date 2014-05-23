@@ -13,6 +13,7 @@ package monitor
 
 import (
 	"fmt"
+	"github.com/daviddengcn/go-colortext"
 	"strconv"
 	"time"
 )
@@ -79,6 +80,7 @@ func Stop() {
 
 func printTitles() {
 	fmt.Println()
+	ct.ChangeColor(ct.Yellow, false, ct.None, false)
 	first := true
 	for _, field := range fields {
 		if !first {
@@ -87,6 +89,7 @@ func printTitles() {
 		fmt.Printf("%v", field.title)
 		first = false
 	}
+	ct.ResetColor()
 	fmt.Println()
 }
 
@@ -111,6 +114,7 @@ func printValues() {
 
 func printSubtotal() {
 	first := true
+	ct.ChangeColor(ct.Cyan, false, ct.None, false)
 	for _, field := range fields {
 		field.wait <- 1
 		s := strconv.Itoa(field.accu)
@@ -124,6 +128,7 @@ func printSubtotal() {
 		first = false
 		<-field.wait
 	}
+	ct.ResetColor()
 	fmt.Println()
 }
 
