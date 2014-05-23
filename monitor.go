@@ -23,8 +23,8 @@ import (
 type Field struct {
 	title   string
 	value   int
+	values  []int
 	accu    int
-	count   int
 	average int
 	reset   bool
 	wait    chan int
@@ -101,14 +101,23 @@ func printValues() {
 	first := true
 	for _, field := range fields {
 		field.wait <- 1
+		field.values = append(field.values, field.value)
+		if len(field.values) > 10 {
+			field.values = field.values[1:]
+		}
+
 		s := strconv.Itoa(field.value)
 		if !first {
 			fmt.Printf("  ")
 		}
 
 		field.accu += field.value
-		field.count++
-		field.average = field.accu / field.count
+
+		total := 0
+		for _, v := range field.values {
+			total += v
+		}
+		field.average = total / len(field.values)
 
 		if field.average == 0 {
 			ct.ChangeColor(ct.Yellow, false, ct.None, false)
@@ -154,11 +163,11 @@ func printAverage() {
 	ct.ChangeColor(ct.Cyan, false, ct.None, false)
 	for _, field := range fields {
 		field.wait <- 1
-		average := field.accu / field.count
+
 		if !first {
 			fmt.Printf(" ")
 		}
-		fmt.Printf("%[2]*[1]v~", average, len(field.title))
+		fmt.Printf("%[2]*[1]v~", field.average, len(field.title))
 
 		first = false
 		<-field.wait
@@ -171,7 +180,6 @@ func fieldReset() {
 	for _, field := range fields {
 		if field.reset {
 			field.accu = 0
-			field.count = 0
 			field.value = 0
 		}
 	}
@@ -187,6 +195,7 @@ func NewField(title string, reset bool) *Field {
 	field.title = title
 	field.reset = reset
 	field.wait = make(chan int, 1)
+	field.values = []int{}
 	fields = append(fields, field)
 	return field
 }
