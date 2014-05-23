@@ -150,7 +150,13 @@ func printSubtotal() {
 		if !first {
 			fmt.Printf(" ")
 		}
-		fmt.Printf("%[2]*[1]v+", s, len(field.title))
+
+		if field.reset {
+			fmt.Printf("%[2]*[1]v+", field.value, len(field.title))
+		} else {
+			fmt.Printf("%[2]*[1]v+", s, len(field.title))
+		}
+
 		first = false
 		<-field.wait
 	}
@@ -167,7 +173,12 @@ func printAverage() {
 		if !first {
 			fmt.Printf(" ")
 		}
-		fmt.Printf("%[2]*[1]v~", field.average, len(field.title))
+
+		if field.reset {
+			fmt.Printf("%[2]*[1]v~", " ", len(field.title))
+		} else {
+			fmt.Printf("%[2]*[1]v~", field.average, len(field.title))
+		}
 
 		first = false
 		<-field.wait
