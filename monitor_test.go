@@ -6,13 +6,13 @@ import (
 )
 
 func Example() {
-	// A value that will not reset its value after each row
-	var monValueA = monitor.NewField("Value_A", false)
+	monValueA := monitor.NewField("Value_A", false)
 	monValueA.Set(1111)
 
-	// A value that will reset its value after each row
-	var monValueB = monitor.NewField("Value_B", true)
-	monValueB.Add(2222)
+	monitor.NewField("Value_B", true)
+
+	monValueC := monitor.NewField("Value_C", true)
+	monValueC.Add(2222)
 
 	monitor.Start()
 	time.Sleep(time.Millisecond * 2100)

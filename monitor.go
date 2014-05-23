@@ -21,11 +21,13 @@ import (
 // Field struct gives control over information printed for this field on each
 // row
 type Field struct {
-	title string
-	value int
-	accu  int
-	reset bool
-	wait  chan int
+	title   string
+	value   int
+	accu    int
+	count   int
+	average int
+	reset   bool
+	wait    chan int
 }
 
 // Add adds given value to Field value
@@ -63,6 +65,8 @@ func Start() {
 				count++
 				if count%10 == 0 || previousFieldCount != len(fields) {
 					printSubtotal()
+					printAverage()
+					fieldReset()
 				}
 
 			case <-stop:
@@ -80,7 +84,7 @@ func Stop() {
 
 func printTitles() {
 	fmt.Println()
-	ct.ChangeColor(ct.Yellow, false, ct.None, false)
+	ct.ChangeColor(ct.Black, false, ct.Cyan, true)
 	first := true
 	for _, field := range fields {
 		if !first {
@@ -101,11 +105,27 @@ func printValues() {
 		if !first {
 			fmt.Printf("  ")
 		}
+
+		field.accu += field.value
+		field.count++
+		field.average = field.accu / field.count
+
+		if field.average == 0 {
+			ct.ChangeColor(ct.Yellow, false, ct.None, false)
+		} else {
+			if field.value >= field.average {
+				ct.ChangeColor(ct.Green, false, ct.None, false)
+			} else {
+				ct.ChangeColor(ct.Red, false, ct.None, false)
+			}
+		}
+
 		fmt.Printf("%[2]*[1]v", s, len(field.title))
+		ct.ResetColor()
 		if field.reset {
-			field.accu += field.value
 			field.value = 0
 		}
+
 		first = false
 		<-field.wait
 	}
@@ -122,14 +142,38 @@ func printSubtotal() {
 			fmt.Printf(" ")
 		}
 		fmt.Printf("%[2]*[1]v+", s, len(field.title))
-		if field.reset {
-			field.accu = 0
-		}
 		first = false
 		<-field.wait
 	}
 	ct.ResetColor()
 	fmt.Println()
+}
+
+func printAverage() {
+	first := true
+	ct.ChangeColor(ct.Cyan, false, ct.None, false)
+	for _, field := range fields {
+		field.wait <- 1
+		average := field.accu / field.count
+		if !first {
+			fmt.Printf(" ")
+		}
+		fmt.Printf("%[2]*[1]v~", average, len(field.title))
+
+		first = false
+		<-field.wait
+	}
+	ct.ResetColor()
+}
+
+func fieldReset() {
+	for _, field := range fields {
+		if field.reset {
+			field.accu = 0
+			field.count = 0
+			field.value = 0
+		}
+	}
 }
 
 // NewField creates a new monitor field that is shown as a column each second
