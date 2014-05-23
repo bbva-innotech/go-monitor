@@ -164,6 +164,7 @@ func printAverage() {
 		<-field.wait
 	}
 	ct.ResetColor()
+	fmt.Println()
 }
 
 func fieldReset() {
