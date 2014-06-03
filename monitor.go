@@ -21,13 +21,14 @@ import (
 // Field struct gives control over information printed for this field on each
 // row
 type Field struct {
-	title   string
-	value   int
-	values  []int
-	accu    int
-	average int
-	reset   bool
-	wait    chan int
+	title         string
+	value         int
+	values        []int
+	accu          int
+	average       int
+	reset         bool
+	wait          chan int
+	reverseColors bool
 }
 
 // Add adds given value to Field value
@@ -42,6 +43,10 @@ func (f *Field) Set(number int) {
 	f.wait <- 1
 	f.value = number
 	<-f.wait
+}
+
+func (f *Field) ReverseColors(reverse bool) {
+	f.reverseColors = reverse
 }
 
 var fields = []*Field{}
@@ -119,13 +124,19 @@ func printValues() {
 		}
 		field.average = total / len(field.values)
 
+		colorGood := ct.Green
+		colorBad := ct.Red
+		if field.reverseColors {
+			colorGood, colorBad = colorBad, colorGood
+		}
+
 		if field.average == 0 {
 			ct.ChangeColor(ct.Yellow, false, ct.None, false)
 		} else {
 			if field.value >= field.average {
-				ct.ChangeColor(ct.Green, false, ct.None, false)
+				ct.ChangeColor(colorGood, false, ct.None, false)
 			} else {
-				ct.ChangeColor(ct.Red, false, ct.None, false)
+				ct.ChangeColor(colorBad, false, ct.None, false)
 			}
 		}
 
